@@ -52,7 +52,7 @@ fun RamadanTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = RamadanTypography,
         content = content
     )
 }
