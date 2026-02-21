@@ -34,7 +34,23 @@ val Typography = Typography(
     )
     */
 )
-val CairoFont = FontFamily(
+// for main titles
+val AlmaraiFont = FontFamily(
     Font(R.font.almarai_regular, FontWeight.Normal),
-    Font(R.font.almarai_bold, FontWeight.Bold),
+        Font(R.font.almarai_bold, FontWeight.Bold),
+        Font(R.font.almarai_extrabold, FontWeight.ExtraBold)
+    )
+// for small details tags, subtitle, etc.
+val IbmPlexArabicFont = FontFamily(
+        Font(R.font.ibm_plex_arabic_regular, FontWeight.Normal),
+        Font(R.font.ibm_plex_arabic_medium, FontWeight.Medium),
+    )
+// للأيات القرانية والأدعية
+val AmiriFont = FontFamily(
+    Font(R.font.amiri_regular, FontWeight.Normal),
+    Font(R.font.amiri_bold, FontWeight.Bold)
+    )
+val InterFont = FontFamily(
+    Font(R.font.inter_regular, FontWeight.Normal),
+    Font(R.font.inter_bold, FontWeight.Bold)
 )
