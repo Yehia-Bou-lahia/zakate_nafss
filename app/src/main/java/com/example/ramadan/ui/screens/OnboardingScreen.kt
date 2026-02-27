@@ -1,5 +1,6 @@
 package com.example.ramadan.ui.screens
 
+import android.window.BackEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,7 +57,7 @@ import com.example.ramadan.ui.theme.SubtitleColor
 import com.example.ramadan.ui.theme.WhiteColor
 
 @Composable
-fun OnboardingScreen() {
+fun OnboardingScreen(onBackClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -88,6 +89,7 @@ fun OnboardingScreen() {
                     .clip(CircleShape)
                     .background(WhiteColor.copy(alpha = 0.1f))
                     .align(Alignment.Start)
+                    .clickable { onBackClick () }
             ) {
                 Text(
                     text = "←",
