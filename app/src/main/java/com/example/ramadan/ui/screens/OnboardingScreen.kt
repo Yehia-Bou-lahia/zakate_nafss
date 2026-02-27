@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -71,6 +73,7 @@ fun OnboardingScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.End
@@ -199,10 +202,16 @@ fun OnboardingScreen() {
             // كثافة العبادات اليومية
             var sliderValue by remember { mutableStateOf(0.5f) }
 
-            val intensityLabel = when {
+            val intensityLable = when {
                 sliderValue < 0.33f -> "مكثفة"
                 sliderValue < 0.66f -> "متوازنة"
                 else -> "يسيرة"
+            }
+            //time
+            val estimatedMinutes = when {
+                sliderValue < 0.33f -> 75
+                sliderValue < 0.66f -> 45
+                else                -> 20
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -216,7 +225,7 @@ fun OnboardingScreen() {
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ){
                     Text(
-                        text = intensityLabel,
+                        text = intensityLable,
                         color = JourneyAccent,
                         fontFamily = IbmPlexArabicFont,
                         fontSize = 12.sp
@@ -235,7 +244,97 @@ fun OnboardingScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             // information Box
+            androidx.compose.material3.Slider(
+                value = 1f - sliderValue,
+                onValueChange = { sliderValue = 1f - it },
+                modifier = Modifier.fillMaxWidth(),
+                colors = androidx.compose.material3.SliderDefaults.colors(
+                    thumbColor = JourneyAccent,
+                    activeTrackColor = JourneyAccent,
+                    inactiveTrackColor = JourneyCard
+                )
+            )
+            // naming args slider
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(text = "يسيرة",   color = SubtitleColor, fontSize = 11.sp, fontFamily = IbmPlexArabicFont)
+                Text(text = "متوازنة", color = SubtitleColor, fontSize = 11.sp, fontFamily = IbmPlexArabicFont)
+                Text(
+                    text = "مكثفة",
+                    color = if (sliderValue < 0.33f) JourneyAccent else SubtitleColor,
+                    fontSize = 11.sp,
+                    fontFamily = IbmPlexArabicFont
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
 
+            // Infomation Box
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(JourneyCard)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(JourneyBlue)
+                ) {
+                    Text(
+                        text = "i",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+                Text(
+                    text = "بناءً على إعداداتك يُتوقع تخصيص حوالي $estimatedMinutes دقيقة للعبادات اليومية.",
+                    color = WhiteColor,
+                    fontFamily = IbmPlexArabicFont,
+                    fontSize = 13.sp,
+                    lineHeight = 20.sp,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            // زر المتابعة
+            androidx.compose.material3.Button(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(50),
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = JourneyBlue
+                )
+            ) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "←",
+                        color = WhiteColor,
+                        fontSize = 24.sp,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                    Text(
+                        text = "متابعة",
+                        color = WhiteColor,
+                        fontFamily = AlmaraiFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
+            }
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -253,7 +352,7 @@ fun HabitCard(
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .then(                  // ← هنا المكان الصحيح
+            .then(
                 if (isSelected) Modifier.shadow(
                     elevation = 12.dp,
                     shape = RoundedCornerShape(16.dp),
@@ -335,9 +434,11 @@ fun HabitCard(
             Text(
                 text = subtitle,
                 fontFamily = IbmPlexArabicFont,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 color = SubtitleColor,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                lineHeight = 14.sp
             )
         }
     }
