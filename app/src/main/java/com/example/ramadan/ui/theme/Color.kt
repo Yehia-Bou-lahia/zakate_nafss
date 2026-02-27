@@ -11,9 +11,9 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 //التدرج الداكن الخلفية
-val DarkTealTop = Color(0xFF0D3D38)
-val DarkTealBottom = Color(0xFF071E1C)
-
+val BgTop    = Color(0xFF0B1026)
+val BgMid    = Color(0xFF0F2E2A)
+val BgBottom = Color(0xFF0A1F1D)
 // gold - title , button and start
 val GoldColor = Color(0xFFE8B84B)
 
