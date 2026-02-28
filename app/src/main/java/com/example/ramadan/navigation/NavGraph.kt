@@ -33,7 +33,7 @@ fun NavGraph() {
         // صفحة اختيار المسار
         composable(Routes.ONBOARDING) {
             OnboardingScreen(
-                onBackClick = {
+                onBackEvent = {
                     navController.popBackStack()
                 }
             )

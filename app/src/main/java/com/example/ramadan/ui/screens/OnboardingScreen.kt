@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ramadan.R
 import com.example.ramadan.ui.theme.AlmaraiFont
+import com.example.ramadan.ui.theme.GoldColor
 import com.example.ramadan.ui.theme.IbmPlexArabicFont
 import com.example.ramadan.ui.theme.JourneyAccent
 import com.example.ramadan.ui.theme.JourneyBgBottom
@@ -57,7 +58,7 @@ import com.example.ramadan.ui.theme.SubtitleColor
 import com.example.ramadan.ui.theme.WhiteColor
 
 @Composable
-fun OnboardingScreen(onBackClick: () -> Unit = {}) {
+fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -74,51 +75,46 @@ fun OnboardingScreen(onBackClick: () -> Unit = {}) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .fillMaxWidth()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.End
         ) {
+            // ══ الجزء العلوي الثابت ══════════════════════
             Spacer(modifier = Modifier.height(48.dp))
+            // جعل العنوان الرئيسي و السهم على نفس المستوى
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-            // arrow back
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
                     .background(WhiteColor.copy(alpha = 0.1f))
-                    .align(Alignment.Start)
-                    .clickable { onBackClick () }
+                    //.align(Alignment.Start)
+                    .clickable { onBackEvent() }
             ) {
-                Text(
-                    text = "←",
-                    color = WhiteColor,
-                    fontSize = 18.sp
-                )
+                Text(text = "←", color = WhiteColor, fontSize = 18.sp)
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            //Spacer(modifier = Modifier.height(32.dp))
 
-            // main title
             Text(
                 text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = WhiteColor)) {
-                        append("حدد ")
-                    }
-                    withStyle(style = SpanStyle(color = JourneyAccent)) {
-                        append("مسار رحلتك")
-                    }
+                    withStyle(style = SpanStyle(color = WhiteColor)) { append("حدد ") }
+                    withStyle(style = SpanStyle(color = JourneyAccent)) { append("مسار رحلتك") }
                 },
                 fontFamily = AlmaraiFont,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 28.sp,
                 textAlign = TextAlign.End
             )
+        }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Title description
             Text(
                 text = "اختر العادات التي ترغب في الالتزام بها خلال هذا الشهر الفضيل.",
                 fontFamily = IbmPlexArabicFont,
@@ -128,218 +124,217 @@ fun OnboardingScreen(onBackClick: () -> Unit = {}) {
                 lineHeight = 22.sp
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // cards state
-            val selectedItems = remember { mutableStateListOf<String>() }
-
-            // cards
+            // ══ المحتوى القابل للـ scroll ═════════════════
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    HabitCard(
-                        id = "quran",
-                        title = "ختم القرآن",
-                        subtitle = "إتمام قراءة الكتاب الكريم",
-                        icon = R.drawable.quran,
-                        isSelected = selectedItems.contains("quran"),
-                        onToggle = {
-                            if (selectedItems.contains("quran")) selectedItems.remove("quran")
-                            else selectedItems.add("quran")
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    HabitCard(
-                        id = "adkar",
-                        title = "الأذكار اليومية",
-                        subtitle = "أذكار الصباح و المساء",
-                        icon = R.drawable.adkare,
-                        isSelected = selectedItems.contains("adkar"),
-                        onToggle = {
-                            if (selectedItems.contains("adkar")) selectedItems.remove("adkar")
-                            else selectedItems.add("adkar")
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    HabitCard(
-                        id = "tarawih",
-                        title = "التراويح",
-                        subtitle = "الصلوات الليلية",
-                        icon = R.drawable.mosque,
-                        isSelected = selectedItems.contains("tarawih"),
-                        onToggle = {
-                            if(selectedItems.contains("tarawih")) selectedItems.remove("tarawih")
-                            else selectedItems.add("tarawih")
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    HabitCard(
-                        id = "sadaka",
-                        title = "الصدقة",
-                        subtitle = "الصدقات و الزكاة",
-                        icon = R.drawable.sadaka,
-                        isSelected = selectedItems.contains("sadaka"),
-                        onToggle = {
-                            if(selectedItems.contains("sadaka")) selectedItems.remove("sadaka")
-                            else selectedItems.add("sadaka")
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // كثافة العبادات اليومية
-            var sliderValue by remember { mutableStateOf(0.5f) }
-
-            val intensityLable = when {
-                sliderValue < 0.33f -> "مكثفة"
-                sliderValue < 0.66f -> "متوازنة"
-                else -> "يسيرة"
-            }
-            //time
-            val estimatedMinutes = when {
-                sliderValue < 0.33f -> 75
-                sliderValue < 0.66f -> 45
-                else                -> 20
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .border(1.dp , JourneyAccent, RoundedCornerShape(50))
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                ){
-                    Text(
-                        text = intensityLable,
-                        color = JourneyAccent,
-                        fontFamily = IbmPlexArabicFont,
-                        fontSize = 12.sp
-                    )
-                }
-
-                Text(
-                    text = "كثافة العبادة اليومية",
-                    color = WhiteColor,
-                    fontFamily = AlmaraiFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // information Box
-            androidx.compose.material3.Slider(
-                value = 1f - sliderValue,
-                onValueChange = { sliderValue = 1f - it },
-                modifier = Modifier.fillMaxWidth(),
-                colors = androidx.compose.material3.SliderDefaults.colors(
-                    thumbColor = JourneyAccent,
-                    activeTrackColor = JourneyAccent,
-                    inactiveTrackColor = JourneyCard
-                )
-            )
-            // naming args slider
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(text = "يسيرة",   color = SubtitleColor, fontSize = 11.sp, fontFamily = IbmPlexArabicFont)
-                Text(text = "متوازنة", color = SubtitleColor, fontSize = 11.sp, fontFamily = IbmPlexArabicFont)
-                Text(
-                    text = "مكثفة",
-                    color = if (sliderValue < 0.33f) JourneyAccent else SubtitleColor,
-                    fontSize = 11.sp,
-                    fontFamily = IbmPlexArabicFont
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Infomation Box
-            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(JourneyCard)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .weight(1f)                          // ← يأخذ المساحة المتبقية
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.End
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(JourneyBlue)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                val selectedItems = remember { mutableStateListOf<String>() }
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = "i",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        HabitCard(
+                            id = "quran", title = "ختم القرآن",
+                            subtitle = "إتمام قراءة الكتاب الكريم",
+                            icon = R.drawable.quran,
+                            isSelected = selectedItems.contains("quran"),
+                            onToggle = {
+                                if (selectedItems.contains("quran")) selectedItems.remove("quran")
+                                else selectedItems.add("quran")
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                        HabitCard(
+                            id = "adkar", title = "الأذكار اليومية",
+                            subtitle = "أذكار الصباح و المساء",
+                            icon = R.drawable.adkare,
+                            isSelected = selectedItems.contains("adkar"),
+                            onToggle = {
+                                if (selectedItems.contains("adkar")) selectedItems.remove("adkar")
+                                else selectedItems.add("adkar")
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        HabitCard(
+                            id = "tarawih", title = "التراويح",
+                            subtitle = "الصلوات الليلية",
+                            icon = R.drawable.mosque,
+                            isSelected = selectedItems.contains("tarawih"),
+                            onToggle = {
+                                if (selectedItems.contains("tarawih")) selectedItems.remove("tarawih")
+                                else selectedItems.add("tarawih")
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                        HabitCard(
+                            id = "sadaka", title = "الصدقة",
+                            subtitle = "الصدقات و الزكاة",
+                            icon = R.drawable.sadaka,
+                            isSelected = selectedItems.contains("sadaka"),
+                            onToggle = {
+                                if (selectedItems.contains("sadaka")) selectedItems.remove("sadaka")
+                                else selectedItems.add("sadaka")
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                var sliderValue by remember { mutableStateOf(0.5f) }
+
+                val intensityLabel = when {
+                    sliderValue < 0.33f -> "مكثفة"
+                    sliderValue < 0.66f -> "متوازنة"
+                    else                -> "يسيرة"
+                }
+
+                val estimatedMinutes = when {
+                    sliderValue < 0.33f -> 75
+                    sliderValue < 0.66f -> 45
+                    else                -> 20
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .border(1.dp, JourneyAccent, RoundedCornerShape(50))
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                    ) {
+                        Text(text = intensityLabel, color = JourneyAccent, fontFamily = IbmPlexArabicFont, fontSize = 12.sp)
+                    }
+
+                    Text(text = "كثافة العبادة اليومية", color = WhiteColor, fontFamily = AlmaraiFont, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // ── شريط متدرج اللون ─────────────────────
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    // خلفية الشريط بتدرج
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        JourneyAccent,           // أخضر يسار
+                                        Color(0xFF3D5AF1),        // أزرق وسط
+                                        Color(0xFF6B3FA0)         // بنفسجي يمين
+                                    )
+                                )
+                            )
+                            .align(Alignment.Center)
+                    )
+                    androidx.compose.material3.Slider(
+                        value = 1f - sliderValue,
+                        onValueChange = { sliderValue = 1f - it },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = androidx.compose.material3.SliderDefaults.colors(
+                            thumbColor = WhiteColor,
+                            activeTrackColor = Color.Transparent,
+                            inactiveTrackColor = Color.Transparent
+                        )
                     )
                 }
-                Text(
-                    text = "بناءً على إعداداتك يُتوقع تخصيص حوالي $estimatedMinutes دقيقة للعبادات اليومية.",
-                    color = WhiteColor,
-                    fontFamily = IbmPlexArabicFont,
-                    fontSize = 13.sp,
-                    lineHeight = 20.sp,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.weight(1f)
-                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "يسيرة",   color = SubtitleColor, fontSize = 11.sp, fontFamily = IbmPlexArabicFont)
+                    Text(text = "متوازنة", color = SubtitleColor, fontSize = 11.sp, fontFamily = IbmPlexArabicFont)
+                    Text(
+                        text = "مكثفة",
+                        color = if (sliderValue < 0.33f) JourneyAccent else SubtitleColor,
+                        fontSize = 11.sp,
+                        fontFamily = IbmPlexArabicFont
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(JourneyCard)
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(JourneyBlue)
+                    ) {
+                        Text(text = "i", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    }
+                    Text(
+                        text = "بناءً على إعداداتك، يُتوقع تخصيص حوالي $estimatedMinutes دقيقة للعبادات اليومية.",
+                        color = WhiteColor,
+                        fontFamily = IbmPlexArabicFont,
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
-            Spacer(modifier = Modifier.height(24.dp))
-            // زر المتابعة
+
+            // ══ الزر الثابت في الأسفل ════════════════════
             androidx.compose.material3.Button(
-                onClick = { /*TODO*/ },
+                onClick = { },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(50),
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                    containerColor = JourneyBlue
+                    containerColor = GoldColor    // ← ذهبي
                 )
             ) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "←",
-                        color = WhiteColor,
-                        fontSize = 24.sp,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
-                    Text(
-                        text = "متابعة",
-                        color = WhiteColor,
-                        fontFamily = AlmaraiFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    Text(text = "←", color = Color.Black, fontSize = 18.sp, modifier = Modifier.align(Alignment.CenterStart))
+                    Text(text = "المتابعة", color = Color.Black, fontFamily = AlmaraiFont, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.align(Alignment.Center))
                 }
-
             }
+
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
+
 
 @Composable
 fun HabitCard(
