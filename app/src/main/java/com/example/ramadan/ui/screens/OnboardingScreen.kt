@@ -1,6 +1,5 @@
 package com.example.ramadan.ui.screens
 
-import android.window.BackEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -78,29 +78,43 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.End
         ) {
+
             // ══ الجزء العلوي الثابت ══════════════════════
             Spacer(modifier = Modifier.height(48.dp))
-            // جعل العنوان الرئيسي و السهم على نفس المستوى
+
+            // ── الدوتس + السهم في Row واحد ───────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // السهم على اليسار
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(WhiteColor.copy(alpha = 0.1f))
+                        .clickable { onBackEvent() }
+                ) {
+                    Text(text = "←", color = WhiteColor, fontSize = 18.sp)
+                }
 
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(WhiteColor.copy(alpha = 0.1f))
-                    //.align(Alignment.Start)
-                    .clickable { onBackEvent() }
-            ) {
-                Text(text = "←", color = WhiteColor, fontSize = 18.sp)
+                // الدوتس في المنتصف
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(WhiteColor.copy(alpha = 0.4f)))
+                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(WhiteColor.copy(alpha = 0.4f)))
+                    Box(modifier = Modifier.width(28.dp).height(8.dp).clip(RoundedCornerShape(50)).background(JourneyBlue))
+                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(WhiteColor.copy(alpha = 0.4f)))
+                }
             }
 
-            //Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
+            // ── العنوان منفصل تحت الدوتس ─────────────────
             Text(
                 text = buildAnnotatedString {
                     withStyle(style = SpanStyle(color = WhiteColor)) { append("حدد ") }
@@ -109,12 +123,13 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
                 fontFamily = AlmaraiFont,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 28.sp,
-                textAlign = TextAlign.End
+                textAlign = TextAlign.End,
+                modifier = Modifier.fillMaxWidth()
             )
-        }
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // ── الوصف ─────────────────────────────────────
             Text(
                 text = "اختر العادات التي ترغب في الالتزام بها خلال هذا الشهر الفضيل.",
                 fontFamily = IbmPlexArabicFont,
@@ -129,7 +144,7 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
             // ══ المحتوى القابل للـ scroll ═════════════════
             Column(
                 modifier = Modifier
-                    .weight(1f)                          // ← يأخذ المساحة المتبقية
+                    .weight(1f)
                     .verticalScroll(rememberScrollState())
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.End
@@ -236,7 +251,6 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
 
                 // ── شريط متدرج اللون ─────────────────────
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    // خلفية الشريط بتدرج
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -245,9 +259,9 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
                             .background(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(
-                                        JourneyAccent,           // أخضر يسار
-                                        Color(0xFF3D5AF1),        // أزرق وسط
-                                        Color(0xFF6B3FA0)         // بنفسجي يمين
+                                        JourneyAccent,
+                                        Color(0xFF3D5AF1),
+                                        Color(0xFF6B3FA0)
                                     )
                                 )
                             )
@@ -281,6 +295,7 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // ── صندوق المعلومات ───────────────────────
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -311,7 +326,8 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-            }
+
+            } // ← إغلاق Column القابل للـ scroll
 
             // ══ الزر الثابت في الأسفل ════════════════════
             androidx.compose.material3.Button(
@@ -321,7 +337,7 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
                     .height(56.dp),
                 shape = RoundedCornerShape(50),
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                    containerColor = GoldColor    // ← ذهبي
+                    containerColor = GoldColor
                 )
             ) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -331,9 +347,10 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-        }
-    }
-}
+
+        } // ← إغلاق Column الرئيسي
+    } // ← إغلاق Box
+} // ← إغلاق OnboardingScreen
 
 
 @Composable
