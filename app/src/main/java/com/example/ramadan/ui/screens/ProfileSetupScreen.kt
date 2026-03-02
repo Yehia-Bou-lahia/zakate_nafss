@@ -1,5 +1,8 @@
 package com.example.ramadan.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,19 +21,27 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.ramadan.ui.theme.AlmaraiFont
 import com.example.ramadan.ui.theme.BgBottom
 import com.example.ramadan.ui.theme.BgMid
 import com.example.ramadan.ui.theme.BgTop
+import com.example.ramadan.ui.theme.GoldColor
 import com.example.ramadan.ui.theme.IbmPlexArabicFont
 import com.example.ramadan.ui.theme.JourneyAccent
 import com.example.ramadan.ui.theme.SubtitleColor
@@ -125,6 +136,58 @@ fun ProfileSetupScreen(onContinueClick: () -> Unit = {} ){
                 color = SubtitleColor,
                 textAlign = TextAlign.Center
             )
+
+            Spacer(modifier = Modifier.height(32.dp))
+            // profile picture
+            // remember لحفظ حالة الصورة المختارة
+            var imageUri by remember { mutableStateOf<Uri?>(null) }
+            /// launcher for open photos
+            val launcher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.GetContent()
+            ) { uri -> imageUri = uri }
+            // circle + add icon
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(120.dp)
+                    .align(Alignment.CenterHorizontally) // center on column
+                    .clickable{ launcher.launch("image/*")}
+            ){
+                // main circle
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(WhiteColor.copy(alpha = 0.1f))
+                ){
+                    if (imageUri != null) {
+                        // if user choose photo
+                        AsyncImage(
+                            model = imageUri,
+                            contentDescription = "profile photo",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
+                    }
+                }
+
+                // add icon + gold in corner
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(GoldColor)
+                        .align(Alignment.BottomStart)
+
+                ){
+                    Text(text = "+" ,color = Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
 
         }
 
