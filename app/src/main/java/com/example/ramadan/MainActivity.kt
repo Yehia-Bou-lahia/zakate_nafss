@@ -9,6 +9,7 @@ import com.example.ramadan.navigation.NavGraph
 import com.example.ramadan.ui.screens.WelcomeScreen
 import com.example.ramadan.ui.theme.RamadanTheme
 import com.example.ramadan.ui.screens.OnboardingScreen
+import com.example.ramadan.ui.screens.PrayerNotificationScreen
 import com.example.ramadan.ui.screens.ProfileSetupScreen
 
 
@@ -18,7 +19,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RamadanTheme {
-                NavGraph()
+                PrayerNotificationScreen ()
             }
         }
     }

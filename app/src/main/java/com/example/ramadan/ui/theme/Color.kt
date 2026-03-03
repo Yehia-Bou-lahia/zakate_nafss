@@ -15,6 +15,10 @@ val BgTop    = Color(0xFF0B1026)
 val BgMid    = Color(0xFF0F2E2A)
 val BgBottom = Color(0xFF0A1F1D)
 
+val PrayerBgTop    = Color(0xFF221E10)
+val PrayerBgMid    = Color(0xFF221E10)
+val PrayerBgBottom = Color(0xFF0D0A02)
+
 //on Boarding background
 val JourneyBgTop = Color(0xFF1A2C50)
 val JourneyBgMid = Color(0xFF0B1021)
