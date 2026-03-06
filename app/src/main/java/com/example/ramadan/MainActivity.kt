@@ -10,16 +10,24 @@ import com.example.ramadan.ui.screens.WelcomeScreen
 import com.example.ramadan.ui.theme.RamadanTheme
 import com.example.ramadan.ui.screens.OnboardingScreen
 import com.example.ramadan.ui.screens.PrayerNotificationScreen
-import com.example.ramadan.ui.screens.ProfileSetupScreen
+
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        org.osmdroid.config.Configuration.getInstance().load(
+            this,
+            androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        )
         enableEdgeToEdge()
         setContent {
             RamadanTheme {
-                PrayerNotificationScreen ()
+                NavGraph()
+                //WelcomeScreen()
+                //OnboardingScreen()
+                //PrayerNotificationScreen()
+                //ProfileSetupScreen ()
             }
         }
     }
