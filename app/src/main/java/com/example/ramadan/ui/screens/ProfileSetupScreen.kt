@@ -1,3 +1,4 @@
+/*
 package com.example.ramadan.ui.screens
 
 import android.location.Geocoder
@@ -103,7 +104,8 @@ fun ProfileSetupScreen(onContinueClick: () -> Unit = {}) {
                     textAlign = TextAlign.Center
                 )
 
-                /*Box(
+                */
+/*Box(
                     modifier = Modifier
                         .width(120.dp)
                         .height(4.dp)
@@ -117,7 +119,8 @@ fun ProfileSetupScreen(onContinueClick: () -> Unit = {}) {
                             .clip(RoundedCornerShape(50))
                             .background(JourneyAccent)
                     )
-                }*/
+                }*//*
+
             }
 
             //Spacer(modifier = Modifier.height(32.dp))
@@ -475,4 +478,4 @@ fun ProfileSetupScreen(onContinueClick: () -> Unit = {}) {
 @Composable
 fun ProfileSetupScreenPreview() {
     ProfileSetupScreen()
-}
+}*/
