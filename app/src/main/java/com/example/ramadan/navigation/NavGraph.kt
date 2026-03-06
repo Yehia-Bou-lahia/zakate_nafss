@@ -5,7 +5,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.ramadan.ui.screens.OnboardingScreen
-import com.example.ramadan.ui.screens.ProfileSetupScreen
 import com.example.ramadan.ui.screens.WelcomeScreen
 
 // ── أسماء الصفحات ─────────────────────────────────
@@ -43,12 +42,6 @@ fun NavGraph() {
                 }
             )
         }
-        composable(Routes.PROFILE_SETUP) {
-            ProfileSetupScreen(
-                onContinueClick = {
-                    // لاحقاً نربطها بالصفحة الرئيسية
-                }
-            )
-        }
+
     }
 }
