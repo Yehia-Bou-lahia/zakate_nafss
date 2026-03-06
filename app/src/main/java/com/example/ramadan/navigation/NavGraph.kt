@@ -11,6 +11,7 @@ import com.example.ramadan.ui.screens.WelcomeScreen
 object Routes {
     const val WELCOME    = "welcome"
     const val ONBOARDING = "onboarding"
+    const val PROFILE_SETUP = "profile_setup"
 }
 
 @Composable
@@ -35,8 +36,12 @@ fun NavGraph() {
             OnboardingScreen(
                 onBackEvent = {
                     navController.popBackStack()
+                },
+                onContinueEvent = {
+                    navController.navigate(Routes.PROFILE_SETUP)
                 }
             )
         }
+
     }
 }

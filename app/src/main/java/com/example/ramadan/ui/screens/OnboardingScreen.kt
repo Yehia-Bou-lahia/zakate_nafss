@@ -58,7 +58,9 @@ import com.example.ramadan.ui.theme.SubtitleColor
 import com.example.ramadan.ui.theme.WhiteColor
 
 @Composable
-fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
+fun OnboardingScreen(onBackEvent: () -> Unit = {},
+                     onContinueEvent: () -> Unit = {}
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -331,7 +333,7 @@ fun OnboardingScreen(onBackEvent: () -> Unit = {}) {
 
             // ══ الزر الثابت في الأسفل ════════════════════
             androidx.compose.material3.Button(
-                onClick = { },
+                onClick = { onContinueEvent()},
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
