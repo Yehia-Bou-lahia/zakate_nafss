@@ -1,4 +1,4 @@
-/*
+
 package com.example.ramadan.ui.screens
 
 import android.location.Geocoder
@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -49,6 +51,7 @@ import com.example.ramadan.ui.theme.BgMid
 import com.example.ramadan.ui.theme.BgTop
 import com.example.ramadan.ui.theme.GoldColor
 import com.example.ramadan.ui.theme.IbmPlexArabicFont
+import com.example.ramadan.ui.theme.JourneyAccent
 import com.example.ramadan.ui.theme.SubtitleColor
 import com.example.ramadan.ui.theme.WhiteColor
 import com.google.android.gms.location.LocationServices
@@ -104,8 +107,8 @@ fun ProfileSetupScreen(onContinueClick: () -> Unit = {}) {
                     textAlign = TextAlign.Center
                 )
 
-                */
-/*Box(
+
+                Box(
                     modifier = Modifier
                         .width(120.dp)
                         .height(4.dp)
@@ -119,7 +122,7 @@ fun ProfileSetupScreen(onContinueClick: () -> Unit = {}) {
                             .clip(RoundedCornerShape(50))
                             .background(JourneyAccent)
                     )
-                }*//*
+                }
 
             }
 
@@ -478,4 +481,4 @@ fun ProfileSetupScreen(onContinueClick: () -> Unit = {}) {
 @Composable
 fun ProfileSetupScreenPreview() {
     ProfileSetupScreen()
-}*/
+}
