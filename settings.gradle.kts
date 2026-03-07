@@ -11,14 +11,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
@@ -28,4 +23,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Ramadan"
 include(":app")
- 
