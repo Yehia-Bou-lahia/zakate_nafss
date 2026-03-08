@@ -533,6 +533,104 @@ fun SpiritualGrowthCard(data: List<Float>) {
         }
     }
 }
+@Composable
+fun AchievementsCard() {
+    val achievements = listOf(
+        Triple("🌟", "صائم لأول مرة", "اليوم الأول"),
+        Triple("📖", "ختم جزء كامل", "منذ يومين"),
+        Triple("🕌", "5 صلوات في وقتها", "منذ 3 أيام"),
+        Triple("💰", "أول صدقة", "منذ أسبوع")
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(WhiteColor.copy(alpha = 0.06f))
+            .border(1.dp, WhiteColor.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
+            .padding(16.dp)
+    ) {
+        Column {
+            // ── الرأس ─────────────────────────────────
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF9B59B6).copy(alpha = 0.15f))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "الأخيرة",
+                        color = Color(0xFF9B59B6),
+                        fontFamily = IbmPlexArabicFont,
+                        fontSize = 11.sp
+                    )
+                }
+                Text(
+                    text = "🏆 الإنجازات",
+                    color = WhiteColor,
+                    fontFamily = AlmaraiFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ── قائمة الإنجازات ───────────────────────
+            achievements.forEachIndexed { index, (emoji, title, time) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(WhiteColor.copy(alpha = 0.04f))
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // ── الوقت ─────────────────────────
+                    Text(
+                        text = time,
+                        color = SubtitleColor,
+                        fontFamily = IbmPlexArabicFont,
+                        fontSize = 11.sp
+                    )
+
+                    // ── العنوان + الأيقونة ────────────
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            text = title,
+                            color = WhiteColor,
+                            fontFamily = IbmPlexArabicFont,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(GoldColor.copy(alpha = 0.15f))
+                        ) {
+                            Text(text = emoji, fontSize = 18.sp)
+                        }
+                    }
+                }
+
+                if (index < achievements.size - 1) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+}
 
 
 @Preview(showBackground = true, showSystemUi = true)
