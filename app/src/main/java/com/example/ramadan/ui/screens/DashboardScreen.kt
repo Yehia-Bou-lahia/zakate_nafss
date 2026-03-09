@@ -80,14 +80,13 @@ fun DashboardScreen(
     val (hijriDay, hijriMonth, hijriYear) = remember { getHijriDate() }
     val todayArabic = remember { getTodayArabic() }
 
-    // ── البيانات الديناميكية من Room ──────────────
     val totalPrayers by dashboardViewModel.totalPrayers.collectAsState()
     val totalQuran   by dashboardViewModel.totalQuranPages.collectAsState()
     val totalSadaqah by dashboardViewModel.totalSadaqah.collectAsState()
     val streakDays   by dashboardViewModel.streakDays.collectAsState()
     val last7Days    by dashboardViewModel.last7Days.collectAsState()
+    val latestAchievements by dashboardViewModel.latestAchievements.collectAsState()
 
-    // ── بيانات الرسم البياني ──────────────────────
     val chartData = last7Days
         .map { it.prayersOnTime.toFloat() + it.quranPages.toFloat() }
         .reversed()
@@ -116,7 +115,6 @@ fun DashboardScreen(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Spacer(modifier = Modifier.height(52.dp))
 
             // ══ TopBar ══════════════════════════════════════
@@ -219,17 +217,10 @@ fun DashboardScreen(
                         Image(
                             painter = painterResource(id = R.drawable.hilaldb),
                             contentDescription = null,
-                            modifier = Modifier
-                                .size(78.dp)
-                                .padding(4.dp)
+                            modifier = Modifier.size(78.dp).padding(4.dp)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "$hijriYear هـ",
-                            color = SubtitleColor,
-                            fontFamily = IbmPlexArabicFont,
-                            fontSize = 12.sp
-                        )
+                        Text(text = "$hijriYear هـ", color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 12.sp)
                     }
 
                     Column(horizontalAlignment = Alignment.End) {
@@ -248,9 +239,7 @@ fun DashboardScreen(
                                 .width(80.dp)
                                 .height(2.dp)
                                 .clip(RoundedCornerShape(50))
-                                .background(
-                                    Brush.horizontalGradient(listOf(Color(0x00C9A84C), GoldColor))
-                                )
+                                .background(Brush.horizontalGradient(listOf(Color(0x00C9A84C), GoldColor)))
                         )
                     }
                 }
@@ -318,6 +307,11 @@ fun DashboardScreen(
 
             // ══ الرسم البياني النمو الروحاني ═══════════════
             SpiritualGrowthCard(data = chartData)
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ══ بطاقة الإنجازات ════════════════════════════
+            AchievementsCard(achievements = latestAchievements)
 
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -427,7 +421,6 @@ fun SpiritualGrowthCard(data: List<Float>) {
             .padding(16.dp)
     ) {
         Column {
-            // ── الرأس ─────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -452,7 +445,6 @@ fun SpiritualGrowthCard(data: List<Float>) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // ── الرسم البياني ─────────────────────────
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -510,7 +502,6 @@ fun SpiritualGrowthCard(data: List<Float>) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ── أيام الأسبوع ──────────────────────────
             val dayLabels = listOf("الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت")
             val todayIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1
 
@@ -533,15 +524,11 @@ fun SpiritualGrowthCard(data: List<Float>) {
         }
     }
 }
-@Composable
-fun AchievementsCard() {
-    val achievements = listOf(
-        Triple("🌟", "صائم لأول مرة", "اليوم الأول"),
-        Triple("📖", "ختم جزء كامل", "منذ يومين"),
-        Triple("🕌", "5 صلوات في وقتها", "منذ 3 أيام"),
-        Triple("💰", "أول صدقة", "منذ أسبوع")
-    )
 
+
+// ── بطاقة الإنجازات ───────────────────────────────────
+@Composable
+fun AchievementsCard(achievements: List<com.example.ramadan.data.Achievement>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -551,7 +538,6 @@ fun AchievementsCard() {
             .padding(16.dp)
     ) {
         Column {
-            // ── الرأس ─────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -563,12 +549,7 @@ fun AchievementsCard() {
                         .background(Color(0xFF9B59B6).copy(alpha = 0.15f))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text(
-                        text = "الأخيرة",
-                        color = Color(0xFF9B59B6),
-                        fontFamily = IbmPlexArabicFont,
-                        fontSize = 11.sp
-                    )
+                    Text(text = "الأخيرة", color = Color(0xFF9B59B6), fontFamily = IbmPlexArabicFont, fontSize = 11.sp)
                 }
                 Text(
                     text = "🏆 الإنجازات",
@@ -581,56 +562,72 @@ fun AchievementsCard() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ── قائمة الإنجازات ───────────────────────
-            achievements.forEachIndexed { index, (emoji, title, time) ->
-                Row(
+            if (achievements.isEmpty()) {
+                // ── حالة فارغة ────────────────────────
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(WhiteColor.copy(alpha = 0.04f))
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(vertical = 16.dp)
                 ) {
-                    // ── الوقت ─────────────────────────
                     Text(
-                        text = time,
+                        text = "لا توجد إنجازات بعد — ابدأ رحلتك! 🌙",
                         color = SubtitleColor,
                         fontFamily = IbmPlexArabicFont,
-                        fontSize = 11.sp
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center
                     )
-
-                    // ── العنوان + الأيقونة ────────────
+                }
+            } else {
+                achievements.forEachIndexed { index, achievement ->
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(WhiteColor.copy(alpha = 0.04f))
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = title,
-                            color = WhiteColor,
+                            text = achievement.date,
+                            color = SubtitleColor,
                             fontFamily = IbmPlexArabicFont,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
+                            fontSize = 11.sp
                         )
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(GoldColor.copy(alpha = 0.15f))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(text = emoji, fontSize = 18.sp)
+                            Text(
+                                text = achievement.title,
+                                color = WhiteColor,
+                                fontFamily = IbmPlexArabicFont,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(GoldColor.copy(alpha = 0.15f))
+                            ) {
+                                Text(text = achievement.emoji, fontSize = 18.sp)
+                            }
                         }
                     }
-                }
 
-                if (index < achievements.size - 1) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    if (index < achievements.size - 1) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
         }
     }
 }
+
+
 
 
 @Preview(showBackground = true, showSystemUi = true)
