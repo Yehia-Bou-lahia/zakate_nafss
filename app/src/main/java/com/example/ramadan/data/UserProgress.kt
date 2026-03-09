@@ -12,3 +12,11 @@ data class UserProgress(
     val fastingHours: Int = 0,
     val sadaqah: Int = 0
 )
+@Entity(tableName = "achievements")
+data class Achievement(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val emoji: String,
+    val title: String,
+    val date: String
+)
