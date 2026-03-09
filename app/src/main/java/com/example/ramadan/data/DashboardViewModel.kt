@@ -47,4 +47,11 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             )
         )
     }
+    val latestAchievements = dao.getLatestAchievements()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+
+    suspend fun unlockAchievement(emoji: String, title: String) {
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(Date())
+        dao.insertAchievement(Achievement(emoji = emoji, title = title, date = today))
+    }
 }

@@ -28,4 +28,10 @@ interface UserProgressDao {
     fun getStreakDays(): Flow<Int?>
     @Query("SELECT * FROM user_progress ORDER BY date DESC LIMIT 7")
     fun getLast7Days(): Flow<List<UserProgress>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAchievement(achievement: Achievement)
+
+    @Query("SELECT * FROM achievements ORDER BY date DESC LIMIT 4")
+    fun getLatestAchievements(): Flow<List<Achievement>>
 }

@@ -24,3 +24,4 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
+@Database(entities = [UserProgress::class, Achievement::class], version = 2)
