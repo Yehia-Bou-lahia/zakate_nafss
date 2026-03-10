@@ -24,8 +24,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RamadanTheme {
-                //NavGraph()
-                DashboardScreen()
+                NavGraph()
+                //DashboardScreen()
                 //WelcomeScreen()
                 //OnboardingScreen()
                 //PrayerNotificationScreen()

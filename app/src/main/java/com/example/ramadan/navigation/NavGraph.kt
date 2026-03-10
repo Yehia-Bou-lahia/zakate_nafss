@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.ramadan.ui.screens.DashboardScreen
 import com.example.ramadan.ui.screens.OnboardingScreen
+import com.example.ramadan.ui.screens.ProfileSetupScreen
 import com.example.ramadan.ui.screens.WelcomeScreen
 
 // ── أسماء الصفحات ─────────────────────────────────
@@ -12,6 +14,7 @@ object Routes {
     const val WELCOME    = "welcome"
     const val ONBOARDING = "onboarding"
     const val PROFILE_SETUP = "profile_setup"
+    const val  DASHBOARD = "dashboard"
 }
 
 @Composable
@@ -41,6 +44,20 @@ fun NavGraph() {
                     navController.navigate(Routes.PROFILE_SETUP)
                 }
             )
+        }
+        // static page
+        composable(Routes.PROFILE_SETUP) {
+            ProfileSetupScreen(
+                /*onBackEvent = {
+                    navController.popBackStack()
+                },*/
+                onContinueClick = {
+                    navController.navigate(Routes.DASHBOARD)
+                }
+            )
+        }
+        composable(Routes.DASHBOARD) {
+            DashboardScreen()
         }
 
     }
