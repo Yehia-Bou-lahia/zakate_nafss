@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ramadan.R
 import com.example.ramadan.data.DashboardViewModel
+import com.example.ramadan.ui.components.BottomNavBar
 import com.example.ramadan.ui.theme.AlmaraiFont
 import com.example.ramadan.ui.theme.BgBottom
 import com.example.ramadan.ui.theme.BgMid
@@ -80,11 +82,11 @@ fun DashboardScreen(
     val (hijriDay, hijriMonth, hijriYear) = remember { getHijriDate() }
     val todayArabic = remember { getTodayArabic() }
 
-    val totalPrayers by dashboardViewModel.totalPrayers.collectAsState()
-    val totalQuran   by dashboardViewModel.totalQuranPages.collectAsState()
-    val totalSadaqah by dashboardViewModel.totalSadaqah.collectAsState()
-    val streakDays   by dashboardViewModel.streakDays.collectAsState()
-    val last7Days    by dashboardViewModel.last7Days.collectAsState()
+    val totalPrayers       by dashboardViewModel.totalPrayers.collectAsState()
+    val totalQuran         by dashboardViewModel.totalQuranPages.collectAsState()
+    val totalSadaqah       by dashboardViewModel.totalSadaqah.collectAsState()
+    val streakDays         by dashboardViewModel.streakDays.collectAsState()
+    val last7Days          by dashboardViewModel.last7Days.collectAsState()
     val latestAchievements by dashboardViewModel.latestAchievements.collectAsState()
 
     val chartData = last7Days
@@ -95,225 +97,237 @@ fun DashboardScreen(
             else list
         }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colorStops = arrayOf(
-                        0.0f to BgTop,
-                        0.5f to BgMid,
-                        1.0f to BgBottom
-                    )
-                )
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(
+                selectedRoute = "dashboard",
+                onItemSelected = { }
             )
-    ) {
-        Column(
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(52.dp))
-
-            // ══ TopBar ══════════════════════════════════════
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(WhiteColor.copy(alpha = 0.08f))
-                        .border(1.dp, WhiteColor.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(5.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        repeat(3) {
-                            Box(
-                                modifier = Modifier
-                                    .width(18.dp)
-                                    .height(2.dp)
-                                    .clip(RoundedCornerShape(50))
-                                    .background(WhiteColor)
-                            )
-                        }
-                    }
-                }
-
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(WhiteColor.copy(alpha = 0.08f))
-                        .border(2.dp, GoldColor, CircleShape)
-                ) {
-                    Text(
-                        text = "م",
-                        color = GoldColor,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = AlmaraiFont
+                .background(
+                    brush = Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.0f to BgTop,
+                            0.5f to BgMid,
+                            1.0f to BgBottom
+                        )
                     )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            // ══ العنوان الرئيسي ════════════════════════════
-            Text(
-                text = "رحلتي الرمضانية",
-                fontFamily = AlmaraiFont,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 30.sp,
-                color = WhiteColor,
-                textAlign = TextAlign.End,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            // ══ العنوان الثانوي ════════════════════════════
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "استمر في التقدم", color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 13.sp)
-                Text(text = " • ", color = SubtitleColor, fontSize = 13.sp)
-                Text(
-                    text = "اليوم $hijriDay من 30",
-                    color = GoldColor,
-                    fontFamily = IbmPlexArabicFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
                 )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ══ بطاقة التاريخ الهجري ══════════════════════
-            Box(
+        ) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(WhiteColor.copy(alpha = 0.06f))
-                    .border(1.dp, WhiteColor.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
-                    .padding(horizontal = 20.dp, vertical = 16.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(innerPadding)
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(52.dp))
+
+                // ══ TopBar ══════════════════════════════════════
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(horizontalAlignment = Alignment.Start) {
-                        Image(
-                            painter = painterResource(id = R.drawable.hilaldb),
-                            contentDescription = null,
-                            modifier = Modifier.size(78.dp).padding(4.dp)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = "$hijriYear هـ", color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 12.sp)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(WhiteColor.copy(alpha = 0.08f))
+                            .border(1.dp, WhiteColor.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                    ) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(5.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            repeat(3) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(18.dp)
+                                        .height(2.dp)
+                                        .clip(RoundedCornerShape(50))
+                                        .background(WhiteColor)
+                                )
+                            }
+                        }
                     }
 
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(text = todayArabic, color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 13.sp)
-                        Spacer(modifier = Modifier.height(4.dp))
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(WhiteColor.copy(alpha = 0.08f))
+                            .border(2.dp, GoldColor, CircleShape)
+                    ) {
                         Text(
-                            text = "$hijriDay $hijriMonth",
-                            fontFamily = AlmaraiFont,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 26.sp,
-                            color = WhiteColor
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .width(80.dp)
-                                .height(2.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(Brush.horizontalGradient(listOf(Color(0x00C9A84C), GoldColor)))
+                            text = "م",
+                            color = GoldColor,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = AlmaraiFont
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                // ══ العنوان الرئيسي ════════════════════════════
+                Text(
+                    text = "رحلتي الرمضانية",
+                    fontFamily = AlmaraiFont,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 30.sp,
+                    color = WhiteColor,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // ══ العنوان الثانوي ════════════════════════════
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "استمر في التقدم", color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 13.sp)
+                    Text(text = " • ", color = SubtitleColor, fontSize = 13.sp)
+                    Text(
+                        text = "اليوم $hijriDay من 30",
+                        color = GoldColor,
+                        fontFamily = IbmPlexArabicFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // ══ بطاقة التاريخ الهجري ══════════════════════
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(WhiteColor.copy(alpha = 0.06f))
+                        .border(1.dp, WhiteColor.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(horizontalAlignment = Alignment.Start) {
+                            Image(
+                                painter = painterResource(id = R.drawable.hilaldb),
+                                contentDescription = null,
+                                modifier = Modifier.size(78.dp).padding(4.dp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = "$hijriYear هـ", color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 12.sp)
+                        }
+
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(text = todayArabic, color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 13.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "$hijriDay $hijriMonth",
+                                fontFamily = AlmaraiFont,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 26.sp,
+                                color = WhiteColor
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(80.dp)
+                                    .height(2.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(Brush.horizontalGradient(listOf(Color(0x00C9A84C), GoldColor)))
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // ══ شبكة الإحصائيات — الصف الأول ══════════════
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        value = "${totalPrayers ?: 0}",
+                        label = "صلوات في وقتها",
+                        badge = "اليوم",
+                        badgeColor = Color(0xFF4A90D9),
+                        iconRes = R.drawable.mosque,
+                        progressColor = Color(0xFF4A90D9),
+                        progress = ((totalPrayers ?: 0) / 150f).coerceIn(0f, 1f)
+                    )
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        value = "${totalQuran ?: 0}",
+                        label = "أجزاء مكتملة",
+                        badge = "الهدف: 30",
+                        badgeColor = Color(0xFF2ECC71),
+                        iconRes = R.drawable.asar,
+                        progressColor = Color(0xFF2ECC71),
+                        progress = ((totalQuran ?: 0) / 30f).coerceIn(0f, 1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // ══ شبكة الإحصائيات — الصف الثاني ═════════════
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        value = "${streakDays ?: 0} يوم",
+                        label = "التتابع الحالي",
+                        badge = "المتوسط",
+                        badgeColor = Color(0xFF9B59B6),
+                        iconRes = R.drawable.hillal,
+                        progressColor = Color(0xFF9B59B6),
+                        progress = ((streakDays ?: 0) / 30f).coerceIn(0f, 1f)
+                    )
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        value = "${totalSadaqah ?: 0}",
+                        label = "صدقات ممنوحة",
+                        badge = "ريال",
+                        badgeColor = Color(0xFFE67E22),
+                        iconRes = R.drawable.star,
+                        progressColor = Color(0xFFE67E22),
+                        progress = ((totalSadaqah ?: 0) / 500f).coerceIn(0f, 1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // ══ الرسم البياني النمو الروحاني ═══════════════
+                SpiritualGrowthCard(data = chartData)
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // ══ بطاقة الإنجازات ════════════════════════════
+                AchievementsCard(achievements = latestAchievements)
+
+                Spacer(modifier = Modifier.height(32.dp))
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ══ شبكة الإحصائيات — الصف الأول ══════════════
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    value = "${totalPrayers ?: 0}",
-                    label = "صلوات في وقتها",
-                    badge = "اليوم",
-                    badgeColor = Color(0xFF4A90D9),
-                    iconRes = R.drawable.mosque,
-                    progressColor = Color(0xFF4A90D9),
-                    progress = ((totalPrayers ?: 0) / 150f).coerceIn(0f, 1f)
-                )
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    value = "${totalQuran ?: 0}",
-                    label = "أجزاء مكتملة",
-                    badge = "الهدف: 30",
-                    badgeColor = Color(0xFF2ECC71),
-                    iconRes = R.drawable.asar,
-                    progressColor = Color(0xFF2ECC71),
-                    progress = ((totalQuran ?: 0) / 30f).coerceIn(0f, 1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ══ شبكة الإحصائيات — الصف الثاني ═════════════
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    value = "${streakDays ?: 0} يوم",
-                    label = "التتابع الحالي",
-                    badge = "المتوسط",
-                    badgeColor = Color(0xFF9B59B6),
-                    iconRes = R.drawable.hillal,
-                    progressColor = Color(0xFF9B59B6),
-                    progress = ((streakDays ?: 0) / 30f).coerceIn(0f, 1f)
-                )
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    value = "${totalSadaqah ?: 0}",
-                    label = "صدقات ممنوحة",
-                    badge = "ريال",
-                    badgeColor = Color(0xFFE67E22),
-                    iconRes = R.drawable.star,
-                    progressColor = Color(0xFFE67E22),
-                    progress = ((totalSadaqah ?: 0) / 500f).coerceIn(0f, 1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ══ الرسم البياني النمو الروحاني ═══════════════
-            SpiritualGrowthCard(data = chartData)
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ══ بطاقة الإنجازات ════════════════════════════
-            AchievementsCard(achievements = latestAchievements)
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -512,7 +526,7 @@ fun SpiritualGrowthCard(data: List<Float>) {
                 (6 downTo 0).forEach { offset ->
                     val dayIdx = ((todayIndex - offset) + 7) % 7
                     Text(
-                        text = dayLabels[dayIdx].take(2),
+                        text = dayLabels[dayIdx].take(8),
                         color = if (offset == 0) GoldColor else SubtitleColor,
                         fontFamily = IbmPlexArabicFont,
                         fontSize = 10.sp,
@@ -563,7 +577,6 @@ fun AchievementsCard(achievements: List<com.example.ramadan.data.Achievement>) {
             Spacer(modifier = Modifier.height(12.dp))
 
             if (achievements.isEmpty()) {
-                // ── حالة فارغة ────────────────────────
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -589,23 +602,12 @@ fun AchievementsCard(achievements: List<com.example.ramadan.data.Achievement>) {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = achievement.date,
-                            color = SubtitleColor,
-                            fontFamily = IbmPlexArabicFont,
-                            fontSize = 11.sp
-                        )
+                        Text(text = achievement.date, color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 11.sp)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(
-                                text = achievement.title,
-                                color = WhiteColor,
-                                fontFamily = IbmPlexArabicFont,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp
-                            )
+                            Text(text = achievement.title, color = WhiteColor, fontFamily = IbmPlexArabicFont, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
@@ -626,8 +628,6 @@ fun AchievementsCard(achievements: List<com.example.ramadan.data.Achievement>) {
         }
     }
 }
-
-
 
 
 @Preview(showBackground = true, showSystemUi = true)
