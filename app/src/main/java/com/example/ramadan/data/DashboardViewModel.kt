@@ -105,4 +105,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         val total = khatmaCount * 30
         return if (total == 0) 0f else completedCount.toFloat() / total.toFloat()
     }
+    suspend fun resetQuranProgress(khatmaCount: Int) {
+        dao.clearQuranProgress()
+        initQuranProgress(khatmaCount)
+    }
 }
