@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ramadan.ui.screens.DashboardScreen
 import com.example.ramadan.ui.screens.OnboardingScreen
 import com.example.ramadan.ui.screens.ProfileSetupScreen
+import com.example.ramadan.ui.screens.QuranScreen
 import com.example.ramadan.ui.screens.WelcomeScreen
 
 // ── أسماء الصفحات ─────────────────────────────────
@@ -15,6 +16,7 @@ object Routes {
     const val ONBOARDING = "onboarding"
     const val PROFILE_SETUP = "profile_setup"
     const val  DASHBOARD = "dashboard"
+    const val QURAN = "quran"
 }
 
 @Composable
@@ -58,6 +60,10 @@ fun NavGraph() {
         }
         composable(Routes.DASHBOARD) {
             DashboardScreen()
+        }
+
+        composable(Routes.QURAN) {
+            QuranScreen()
         }
 
     }

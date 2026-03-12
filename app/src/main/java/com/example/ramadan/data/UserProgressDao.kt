@@ -34,4 +34,20 @@ interface UserProgressDao {
 
     @Query("SELECT * FROM achievements ORDER BY date DESC LIMIT 4")
     fun getLatestAchievements(): Flow<List<Achievement>>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertQuranProgress(progress: QuranProgress)
+
+    @Query("SELECT * FROM quran_progress ORDER BY khatmaNumber, juzNumber")
+    fun getAllQuranProgress(): Flow<List<QuranProgress>>
+
+    @Query("SELECT COUNT(*) FROM quran_progress WHERE isCompleted = 1")
+    fun getCompletedJuzCount(): Flow<Int?>
+
+    @Query("UPDATE quran_progress SET isCompleted = 1, completedDate = :date WHERE juzNumber = :juz AND khatmaNumber = :khatma")
+    suspend fun markJuzCompleted(juz: Int, khatma: Int, date: String)
+    @Query("SELECT COUNT(*) FROM quran_progress")
+    suspend fun getQuranProgressCount(): Int
+
+    @Query("DELETE FROM quran_progress")
+    suspend fun clearQuranProgress()
 }
