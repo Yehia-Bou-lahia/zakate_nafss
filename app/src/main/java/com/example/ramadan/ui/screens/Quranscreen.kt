@@ -31,20 +31,32 @@ import com.example.ramadan.data.DashboardViewModel
 import com.example.ramadan.data.QuranData
 import com.example.ramadan.ui.components.BottomNavBar
 import com.example.ramadan.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun QuranScreen(
     dashboardViewModel: DashboardViewModel = viewModel()
 ) {
+    val scope = rememberCoroutineScope()
+
+    // ── اختيار عدد الختمات (محفوظ مؤقتاً في State) ──
     var selectedKhatma by remember { mutableStateOf(1) }
 
-    // قائمة الأجزاء المكتملة — مؤقتاً، سيأتي من Room لاحقاً
-    val completedJuzSet = remember { mutableStateListOf<Int>() }
+    // ── بيانات من Room ────────────────────────────────
+    val allProgress    by dashboardViewModel.allQuranProgress.collectAsState()
+    val completedCount by dashboardViewModel.completedJuzCount.collectAsState()
 
+    // ── حسابات التقدم ─────────────────────────────────
     val totalJuz   = selectedKhatma * 30
-    val completedJuz = completedJuzSet.size
-    val progress   = if (totalJuz == 0) 0f else completedJuz.toFloat() / totalJuz.toFloat()
-    val currentJuz = completedJuz + 1
+    val progress   = dashboardViewModel.getLanternProgress(selectedKhatma, completedCount ?: 0)
+    val currentJuz = dashboardViewModel.getCurrentJuz(selectedKhatma, completedCount ?: 0)
+    val currentKhatma = dashboardViewModel.getCurrentKhatma(completedCount ?: 0)
+
+    // ── قائمة الأجزاء المكتملة من Room ───────────────
+    val completedSet = allProgress
+        .filter { it.isCompleted }
+        .map { it.juzNumber + ((it.khatmaNumber - 1) * 30) }
+        .toSet()
 
     Scaffold(
         bottomBar = {
@@ -134,9 +146,11 @@ fun QuranScreen(
                 // ══ اختيار عدد الختمات ══════════════════
                 KhatmaSelector(
                     selected = selectedKhatma,
-                    onSelect = {
-                        selectedKhatma = it
-                        completedJuzSet.clear()
+                    onSelect = { newKhatma ->
+                        selectedKhatma = newKhatma
+                        scope.launch {
+                            dashboardViewModel.initQuranProgress(newKhatma)
+                        }
                     }
                 )
 
@@ -174,8 +188,8 @@ fun QuranScreen(
                     khatmaCount   = selectedKhatma,
                     currentJuz    = currentJuz,
                     onRecordClick = {
-                        if (!completedJuzSet.contains(currentJuz)) {
-                            completedJuzSet.add(currentJuz)
+                        scope.launch {
+                            dashboardViewModel.completeJuz(currentJuz, currentKhatma)
                         }
                     }
                 )
@@ -184,14 +198,17 @@ fun QuranScreen(
 
                 // ══ قائمة الأجزاء ════════════════════════
                 JuzListSection(
-                    khatmaCount    = selectedKhatma,
-                    completedJuzSet = completedJuzSet,
-                    currentJuz     = currentJuz,
-                    onJuzToggle    = { juzNumber ->
-                        if (completedJuzSet.contains(juzNumber)) {
-                            completedJuzSet.remove(juzNumber)
-                        } else {
-                            completedJuzSet.add(juzNumber)
+                    khatmaCount     = selectedKhatma,
+                    completedJuzSet = completedSet,
+                    currentJuz      = (completedCount ?: 0) + 1,
+                    onJuzToggle     = { globalJuz ->
+                        val juzNum   = ((globalJuz - 1) % 30) + 1
+                        val khatmaNum = ((globalJuz - 1) / 30) + 1
+                        scope.launch {
+                            val isCompleted = completedSet.contains(globalJuz)
+                            if (!isCompleted) {
+                                dashboardViewModel.completeJuz(juzNum, khatmaNum)
+                            }
                         }
                     }
                 )
@@ -199,218 +216,6 @@ fun QuranScreen(
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
-    }
-}
-
-
-// ── قائمة الأجزاء ────────────────────────────────────
-@Composable
-fun JuzListSection(
-    khatmaCount: Int,
-    completedJuzSet: List<Int>,
-    currentJuz: Int,
-    onJuzToggle: (Int) -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-
-        // ── عنوان القسم ──────────────────────────────
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // تبويب بالجزء / بالسورة
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(GreenLight.copy(alpha = 0.15f))
-                        .border(1.dp, GreenLight.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "بالجزء",
-                        color = GreenLight,
-                        fontFamily = IbmPlexArabicFont,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(WhiteColor.copy(alpha = 0.06f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "بالسورة",
-                        color = SubtitleColor,
-                        fontFamily = IbmPlexArabicFont,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-
-            Text(
-                text = "المتابعة",
-                fontFamily = AlmaraiFont,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = WhiteColor
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // ── عناصر الأجزاء ────────────────────────────
-        repeat(30 * khatmaCount) { index ->
-            val juzNumber  = (index % 30) + 1
-            val khatmaNum  = (index / 30) + 1
-            val globalJuz  = index + 1
-            val isCompleted = completedJuzSet.contains(globalJuz)
-            val isCurrent  = globalJuz == currentJuz
-            val juzInfo    = QuranData.juzList.getOrNull(juzNumber - 1)
-
-            JuzItem(
-                juzNumber   = juzNumber,
-                khatmaNum   = if (khatmaCount > 1) khatmaNum else null,
-                juzInfo     = juzInfo,
-                isCompleted = isCompleted,
-                isCurrent   = isCurrent,
-                onToggle    = { onJuzToggle(globalJuz) }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-
-// ── عنصر جزء واحد ────────────────────────────────────
-@Composable
-fun JuzItem(
-    juzNumber: Int,
-    khatmaNum: Int?,
-    juzInfo: com.example.ramadan.data.JuzInfo?,
-    isCompleted: Boolean,
-    isCurrent: Boolean,
-    onToggle: () -> Unit
-) {
-    val borderColor = when {
-        isCurrent   -> GreenLight
-        isCompleted -> GreenDark.copy(alpha = 0.5f)
-        else        -> WhiteColor.copy(alpha = 0.08f)
-    }
-
-    val arabicNumbers = listOf("١","٢","٣","٤","٥","٦","٧","٨","٩","١٠",
-        "١١","١٢","١٣","١٤","١٥","١٦","١٧","١٨","١٩","٢٠",
-        "٢١","٢٢","٢٣","٢٤","٢٥","٢٦","٢٧","٢٨","٢٩","٣٠")
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(
-                if (isCurrent) GreenLight.copy(alpha = 0.07f)
-                else WhiteColor.copy(alpha = 0.04f)
-            )
-            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
-            .padding(horizontal = 14.dp, vertical = 14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // ── Checkbox ──────────────────────────────────
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(28.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(
-                    if (isCompleted) GreenLight.copy(alpha = 0.2f)
-                    else WhiteColor.copy(alpha = 0.06f)
-                )
-                .border(
-                    1.5.dp,
-                    if (isCompleted) GreenLight else WhiteColor.copy(alpha = 0.2f),
-                    RoundedCornerShape(8.dp)
-                )
-                .clickable { onToggle() }
-        ) {
-            if (isCompleted) {
-                Text(text = "✓", color = GreenLight, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-
-        // ── معلومات الجزء ──────────────────────────────
-        Column(
-            horizontalAlignment = Alignment.End,
-            modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                if (isCurrent) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(GreenLight.copy(alpha = 0.2f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "الحالي",
-                            color = GreenLight,
-                            fontFamily = IbmPlexArabicFont,
-                            fontSize = 10.sp
-                        )
-                    }
-                } else if (isCompleted) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(GreenDark.copy(alpha = 0.2f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "تم",
-                            color = GreenDark,
-                            fontFamily = IbmPlexArabicFont,
-                            fontSize = 10.sp
-                        )
-                    }
-                }
-
-                Text(
-                    text = "الجزء ${arabicNumbers.getOrElse(juzNumber - 1) { juzNumber.toString() }}" +
-                            if (khatmaNum != null) " — ختمة $khatmaNum" else "",
-                    color = if (isCompleted || isCurrent) WhiteColor else WhiteColor.copy(alpha = 0.7f),
-                    fontFamily = IbmPlexArabicFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(3.dp))
-
-            Text(
-                text = if (juzInfo != null)
-                    "${juzInfo.startSurah} (${juzInfo.startAyah}) - ${juzInfo.endSurah} (${juzInfo.endAyah})"
-                else "",
-                color = SubtitleColor,
-                fontFamily = IbmPlexArabicFont,
-                fontSize = 11.sp
-            )
-        }
-
-        // ── أول كلمات الجزء ───────────────────────────
-        Text(
-            text = juzInfo?.firstWords ?: "",
-            color = SubtitleColor.copy(alpha = 0.6f),
-            fontFamily = IbmPlexArabicFont,
-            fontSize = 13.sp,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.width(80.dp)
-        )
     }
 }
 
@@ -480,10 +285,10 @@ fun DailyGoalCard(
     currentJuz: Int,
     onRecordClick: () -> Unit
 ) {
-    val dailyPages  = khatmaCount * 20
-    val startPage   = ((currentJuz - 1) * 20) + 1
-    val endPage     = startPage + dailyPages - 1
-    val juzInfo     = QuranData.juzList.getOrNull(currentJuz - 1)
+    val dailyPages = khatmaCount * 20
+    val startPage  = ((currentJuz - 1) * 20) + 1
+    val endPage    = startPage + dailyPages - 1
+    val juzInfo    = QuranData.juzList.getOrNull(currentJuz - 1)
 
     Box(
         modifier = Modifier
@@ -590,6 +395,178 @@ fun DailyGoalCard(
                 }
             }
         }
+    }
+}
+
+
+// ── قائمة الأجزاء ────────────────────────────────────
+@Composable
+fun JuzListSection(
+    khatmaCount: Int,
+    completedJuzSet: Set<Int>,
+    currentJuz: Int,
+    onJuzToggle: (Int) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(GreenLight.copy(alpha = 0.15f))
+                        .border(1.dp, GreenLight.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(text = "بالجزء", color = GreenLight, fontFamily = IbmPlexArabicFont, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(WhiteColor.copy(alpha = 0.06f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(text = "بالسورة", color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 12.sp)
+                }
+            }
+            Text(text = "المتابعة", fontFamily = AlmaraiFont, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = WhiteColor)
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        repeat(30 * khatmaCount) { index ->
+            val juzNumber  = (index % 30) + 1
+            val khatmaNum  = (index / 30) + 1
+            val globalJuz  = index + 1
+            val isCompleted = completedJuzSet.contains(globalJuz)
+            val isCurrent  = globalJuz == currentJuz
+            val juzInfo    = QuranData.juzList.getOrNull(juzNumber - 1)
+
+            JuzItem(
+                juzNumber   = juzNumber,
+                khatmaNum   = if (khatmaCount > 1) khatmaNum else null,
+                juzInfo     = juzInfo,
+                isCompleted = isCompleted,
+                isCurrent   = isCurrent,
+                onToggle    = { onJuzToggle(globalJuz) }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+
+// ── عنصر جزء واحد ────────────────────────────────────
+@Composable
+fun JuzItem(
+    juzNumber: Int,
+    khatmaNum: Int?,
+    juzInfo: com.example.ramadan.data.JuzInfo?,
+    isCompleted: Boolean,
+    isCurrent: Boolean,
+    onToggle: () -> Unit
+) {
+    val borderColor = when {
+        isCurrent   -> GreenLight
+        isCompleted -> GreenDark.copy(alpha = 0.5f)
+        else        -> WhiteColor.copy(alpha = 0.08f)
+    }
+
+    val arabicNumbers = listOf(
+        "١","٢","٣","٤","٥","٦","٧","٨","٩","١٠",
+        "١١","١٢","١٣","١٤","١٥","١٦","١٧","١٨","١٩","٢٠",
+        "٢١","٢٢","٢٣","٢٤","٢٥","٢٦","٢٧","٢٨","٢٩","٣٠"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(if (isCurrent) GreenLight.copy(alpha = 0.07f) else WhiteColor.copy(alpha = 0.04f))
+            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
+            .padding(horizontal = 14.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // ── Checkbox ──────────────────────────────
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(28.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(if (isCompleted) GreenLight.copy(alpha = 0.2f) else WhiteColor.copy(alpha = 0.06f))
+                .border(1.5.dp, if (isCompleted) GreenLight else WhiteColor.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                .clickable { onToggle() }
+        ) {
+            if (isCompleted) {
+                Text(text = "✓", color = GreenLight, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+
+        // ── معلومات الجزء ──────────────────────────
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (isCurrent) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(GreenLight.copy(alpha = 0.2f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(text = "الحالي", color = GreenLight, fontFamily = IbmPlexArabicFont, fontSize = 10.sp)
+                    }
+                } else if (isCompleted) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(GreenDark.copy(alpha = 0.2f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(text = "تم", color = GreenDark, fontFamily = IbmPlexArabicFont, fontSize = 10.sp)
+                    }
+                }
+
+                Text(
+                    text = "الجزء ${arabicNumbers.getOrElse(juzNumber - 1) { juzNumber.toString() }}" +
+                            if (khatmaNum != null) " — ختمة $khatmaNum" else "",
+                    color = if (isCompleted || isCurrent) WhiteColor else WhiteColor.copy(alpha = 0.7f),
+                    fontFamily = IbmPlexArabicFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(3.dp))
+
+            Text(
+                text = if (juzInfo != null)
+                    "${juzInfo.startSurah} (${juzInfo.startAyah}) - ${juzInfo.endSurah} (${juzInfo.endAyah})"
+                else "",
+                color = SubtitleColor,
+                fontFamily = IbmPlexArabicFont,
+                fontSize = 11.sp
+            )
+        }
+
+        // ── أول كلمات الجزء ───────────────────────
+        Text(
+            text = juzInfo?.firstWords ?: "",
+            color = SubtitleColor.copy(alpha = 0.6f),
+            fontFamily = IbmPlexArabicFont,
+            fontSize = 13.sp,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.width(80.dp)
+        )
     }
 }
 
