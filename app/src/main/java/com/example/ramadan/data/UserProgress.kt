@@ -20,3 +20,12 @@ data class Achievement(
     val title: String,
     val date: String
 )
+@Entity(tableName = "quran_progress")
+data class QuranProgress(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val juzNumber: Int,
+    val khatmaNumber: Int,
+    val isCompleted: Boolean = false,
+    val completedDate: String? = null
+)
