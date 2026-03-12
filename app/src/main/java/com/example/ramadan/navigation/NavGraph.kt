@@ -17,6 +17,7 @@ object Routes {
     const val PROFILE_SETUP = "profile_setup"
     const val  DASHBOARD = "dashboard"
     const val QURAN = "quran"
+    const val DHIKR = "dhikr"
 }
 
 @Composable
@@ -54,7 +55,7 @@ fun NavGraph() {
                     navController.popBackStack()
                 },*/
                 onContinueClick = {
-                    navController.navigate(Routes.DASHBOARD)
+                    navController.navigate(Routes.QURAN)
                 }
             )
         }
@@ -64,6 +65,10 @@ fun NavGraph() {
 
         composable(Routes.QURAN) {
             QuranScreen()
+        }
+
+        composable(Routes.DHIKR) {
+            DhikrScreen()
         }
 
     }
