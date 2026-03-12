@@ -54,4 +54,55 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(Date())
         dao.insertAchievement(Achievement(emoji = emoji, title = title, date = today))
     }
+    // ── بيانات القرآن ─────────────────────────────
+    val allQuranProgress = dao.getAllQuranProgress()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+
+    val completedJuzCount = dao.getCompletedJuzCount()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0)
+
+    // ── تهيئة الأجزاء عند اختيار عدد الختمات ──────
+    suspend fun initQuranProgress(khatmaCount: Int) {
+        val existing = dao.getQuranProgressCount()
+        if (existing > 0) return  // تم التهيئة مسبقاً
+
+        for (khatma in 1..khatmaCount) {
+            for (juz in 1..30) {
+                dao.insertQuranProgress(
+                    QuranProgress(
+                        juzNumber = juz,
+                        khatmaNumber = khatma,
+                        isCompleted = false
+                    )
+                )
+            }
+        }
+    }
+
+    // ── تحديد الجزء الحالي ────────────────────────
+    fun getCurrentJuz(khatmaCount: Int, completedCount: Int): Int {
+        return (completedCount % 30) + 1
+    }
+
+    // ── تحديد الختمة الحالية ──────────────────────
+    fun getCurrentKhatma(completedCount: Int): Int {
+        return (completedCount / 30) + 1
+    }
+
+    // ── تعليم جزء كمكتمل ─────────────────────────
+    suspend fun completeJuz(juz: Int, khatma: Int) {
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(Date())
+        dao.markJuzCompleted(juz, khatma, today)
+
+        // فتح إنجاز عند إكمال ختمة كاملة
+        if (juz == 30) {
+            unlockAchievement("📖", "أكملت الختمة $khatma")
+        }
+    }
+
+    // ── نسبة التقدم للفانوس (0f - 1f) ────────────
+    fun getLanternProgress(khatmaCount: Int, completedCount: Int): Float {
+        val total = khatmaCount * 30
+        return if (total == 0) 0f else completedCount.toFloat() / total.toFloat()
+    }
 }
