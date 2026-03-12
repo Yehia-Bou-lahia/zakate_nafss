@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [UserProgress::class, Achievement::class], version = 2)
+@Database(entities = [UserProgress::class, Achievement::class, QuranProgress::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userProgressDao(): UserProgressDao
 
