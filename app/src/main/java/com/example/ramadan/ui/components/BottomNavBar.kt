@@ -35,11 +35,12 @@ import com.example.ramadan.ui.theme.SubtitleColor
 import com.example.ramadan.ui.theme.WhiteColor
 
 sealed class BottomNavItem(val route: String, val icon: Int?, val label: String) {
-    object Home      : BottomNavItem("dashboard", R.drawable.home,    "الرئيسية")
-    object Stats     : BottomNavItem("stats",     R.drawable.statics, "الإحصائيات")
+    object Home  : BottomNavItem("quran",     R.drawable.home,    "الرئيسية")
+    object Stats : BottomNavItem("dashboard", R.drawable.statics, "الإحصائيات")
     object Add       : BottomNavItem("add",       null,               "")
-    object Community : BottomNavItem("community", R.drawable.users,   "المجتمع")
+    //object Community : BottomNavItem("community", R.drawable.users,   "المجتمع")
     object Profile   : BottomNavItem("profile",   R.drawable.user,    "الملف")
+    object Profile : BottomNavItem("dhikr", R.drawable.user, "الذكر")
 }
 
 @Composable
