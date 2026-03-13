@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.ramadan.ui.screens.AdhkarScreen
 import com.example.ramadan.ui.screens.DashboardScreen
+import com.example.ramadan.ui.screens.DhikrScreen
 import com.example.ramadan.ui.screens.OnboardingScreen
 import com.example.ramadan.ui.screens.ProfileSetupScreen
 import com.example.ramadan.ui.screens.QuranScreen
@@ -18,6 +20,7 @@ object Routes {
     const val  DASHBOARD = "dashboard"
     const val QURAN = "quran"
     const val DHIKR = "dhikr"
+    const val ADHKAR = "adhkar/{type}"
 }
 
 @Composable
@@ -60,15 +63,23 @@ fun NavGraph() {
             )
         }
         composable(Routes.DASHBOARD) {
-            DashboardScreen()
+            DashboardScreen(onNavigate = { navController.navigate(it) })
         }
 
         composable(Routes.QURAN) {
-            QuranScreen()
+            QuranScreen(onNavigate = { navController.navigate(it) })
         }
 
         composable(Routes.DHIKR) {
-            DhikrScreen()
+            DhikrScreen(onNavigate = { navController.navigate(it) })
+        }
+
+        composable("adhkar/{type}") { backStackEntry ->
+            val type = backStackEntry.arguments?.getString("type") ?: "sabah"
+            AdhkarScreen(
+                type   = type,
+                onBack = { navController.popBackStack() }
+            )
         }
 
     }
