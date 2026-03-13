@@ -30,41 +30,40 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ramadan.R
 import com.example.ramadan.ui.theme.GoldColor
+import com.example.ramadan.ui.theme.GreenDark
+import com.example.ramadan.ui.theme.GreenLight
 import com.example.ramadan.ui.theme.IbmPlexArabicFont
 import com.example.ramadan.ui.theme.SubtitleColor
 import com.example.ramadan.ui.theme.WhiteColor
 
 sealed class BottomNavItem(val route: String, val icon: Int?, val label: String) {
-    object Home  : BottomNavItem("quran",     R.drawable.home,    "الرئيسية")
-    object Stats : BottomNavItem("dashboard", R.drawable.statics, "الإحصائيات")
-    object Add       : BottomNavItem("add",       null,               "")
-    //object Community : BottomNavItem("community", R.drawable.users,   "المجتمع")
-    object Profile   : BottomNavItem("profile",   R.drawable.user,    "الملف")
-    object Profile : BottomNavItem("dhikr", R.drawable.user, "الذكر")
+    object Home    : BottomNavItem("quran",     R.drawable.home,    "الرئيسية")
+    object Stats   : BottomNavItem("dashboard", R.drawable.statics, "الإحصائيات")
+    object Add     : BottomNavItem("add",       null,               "")
+    object Dhikr   : BottomNavItem("dhikr",     R.drawable.dhikr,    "الذكر")
+    object Profile : BottomNavItem("profile",   R.drawable.user,    "الملف")
 }
 
 @Composable
 fun BottomNavBar(
-    selectedRoute: String = "dashboard",
+    selectedRoute: String = "quran",
     onItemSelected: (String) -> Unit = {}
 ) {
-    // ── RTL: الرئيسية في اليمين ───────────────────
+    // RTL: الرئيسية في اليمين — الذكر في اليسار
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Stats,
         BottomNavItem.Add,
-        BottomNavItem.Community,
+        BottomNavItem.Dhikr,
         BottomNavItem.Profile
     ).reversed()
 
-    val activeGreen = Color(0xFF2ECC71)
-    val barColor    = Color(0xFF0D1F0D)
+    val barColor = Color(0xFF0D1F0D)
 
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter
     ) {
-        // ── الشريط السفلي ─────────────────────────
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -126,15 +125,15 @@ fun BottomNavBar(
                 .shadow(
                     elevation = 24.dp,
                     shape = CircleShape,
-                    ambientColor = activeGreen,
-                    spotColor = activeGreen
+                    ambientColor = GreenLight,
+                    spotColor = GreenLight
                 )
                 .size(60.dp)
                 .clip(CircleShape)
                 .border(3.dp, barColor, CircleShape)
                 .background(
                     brush = Brush.verticalGradient(
-                        listOf(Color(0xFF2ECC71), Color(0xFF1A8A4A))
+                        listOf(GreenLight, GreenDark)
                     )
                 )
                 .clickable { onItemSelected("add") }
