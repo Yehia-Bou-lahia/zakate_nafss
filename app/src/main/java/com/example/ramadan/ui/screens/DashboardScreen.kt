@@ -55,7 +55,6 @@ import com.example.ramadan.ui.theme.SubtitleColor
 import com.example.ramadan.ui.theme.WhiteColor
 import java.util.Calendar
 
-// ── تحويل التاريخ باستخدام UmmalquraCalendar ──────────
 fun getHijriDate(): Triple<Int, String, Int> {
     val hijriCal = com.github.msarhan.ummalqura.calendar.UmmalquraCalendar()
     val hijriMonths = listOf(
@@ -69,7 +68,6 @@ fun getHijriDate(): Triple<Int, String, Int> {
     return Triple(day, hijriMonths[month], year)
 }
 
-// ── اليوم الحالي بالعربية ──────────────────────────────
 fun getTodayArabic(): String {
     val days = listOf("الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت")
     return days[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1]
@@ -77,6 +75,7 @@ fun getTodayArabic(): String {
 
 @Composable
 fun DashboardScreen(
+    onNavigate: (String) -> Unit = {},
     dashboardViewModel: DashboardViewModel = viewModel()
 ) {
     val (hijriDay, hijriMonth, hijriYear) = remember { getHijriDate() }
@@ -101,7 +100,7 @@ fun DashboardScreen(
         bottomBar = {
             BottomNavBar(
                 selectedRoute = "dashboard",
-                onItemSelected = { }
+                onItemSelected = { onNavigate(it) }
             )
         },
         containerColor = Color.Transparent
@@ -130,7 +129,6 @@ fun DashboardScreen(
             ) {
                 Spacer(modifier = Modifier.height(52.dp))
 
-                // ══ TopBar ══════════════════════════════════════
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -180,7 +178,6 @@ fun DashboardScreen(
 
                 Spacer(modifier = Modifier.height(28.dp))
 
-                // ══ العنوان الرئيسي ════════════════════════════
                 Text(
                     text = "رحلتي الرمضانية",
                     fontFamily = AlmaraiFont,
@@ -193,7 +190,6 @@ fun DashboardScreen(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // ══ العنوان الثانوي ════════════════════════════
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
@@ -212,7 +208,6 @@ fun DashboardScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // ══ بطاقة التاريخ الهجري ══════════════════════
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -260,7 +255,6 @@ fun DashboardScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // ══ شبكة الإحصائيات — الصف الأول ══════════════
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -289,7 +283,6 @@ fun DashboardScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // ══ شبكة الإحصائيات — الصف الثاني ═════════════
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -318,12 +311,10 @@ fun DashboardScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // ══ الرسم البياني النمو الروحاني ═══════════════
                 SpiritualGrowthCard(data = chartData)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // ══ بطاقة الإنجازات ════════════════════════════
                 AchievementsCard(achievements = latestAchievements)
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -333,7 +324,6 @@ fun DashboardScreen(
 }
 
 
-// ── بطاقة إحصاء ──────────────────────────────────────
 @Composable
 fun StatCard(
     modifier: Modifier = Modifier,
@@ -423,7 +413,6 @@ fun StatCard(
 }
 
 
-// ── بطاقة النمو الروحاني ──────────────────────────────
 @Composable
 fun SpiritualGrowthCard(data: List<Float>) {
     Box(
@@ -540,7 +529,6 @@ fun SpiritualGrowthCard(data: List<Float>) {
 }
 
 
-// ── بطاقة الإنجازات ───────────────────────────────────
 @Composable
 fun AchievementsCard(achievements: List<com.example.ramadan.data.Achievement>) {
     Box(
@@ -619,10 +607,7 @@ fun AchievementsCard(achievements: List<com.example.ramadan.data.Achievement>) {
                             }
                         }
                     }
-
-                    if (index < achievements.size - 1) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                    if (index < achievements.size - 1) Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
