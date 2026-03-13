@@ -7,11 +7,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.ramadan.navigation.NavGraph
 import com.example.ramadan.ui.screens.DashboardScreen
+import com.example.ramadan.ui.screens.DhikrScreen
 import com.example.ramadan.ui.screens.WelcomeScreen
 import com.example.ramadan.ui.theme.RamadanTheme
 import com.example.ramadan.ui.screens.OnboardingScreen
 import com.example.ramadan.ui.screens.PrayerNotificationScreen
-
+import com.example.ramadan.ui.screens.QuranScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -24,7 +25,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RamadanTheme {
-                NavGraph()
+                DhikrScreen()
+                //NavGraph()
+                //QuranScreen()
                 //DashboardScreen()
                 //WelcomeScreen()
                 //OnboardingScreen()
