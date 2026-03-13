@@ -2,6 +2,7 @@ package com.example.ramadan.ui.screens
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,14 +11,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,36 +42,77 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun QuranScreen(
+    onNavigate: (String) -> Unit = {},
     dashboardViewModel: DashboardViewModel = viewModel()
 ) {
     val scope = rememberCoroutineScope()
-
-    // ── اختيار عدد الختمات (محفوظ مؤقتاً في State) ──
     var selectedKhatma by remember { mutableStateOf(1) }
+    var showKhatmaDialog by remember { mutableStateOf(false) }
 
-    // ── بيانات من Room ────────────────────────────────
     val allProgress    by dashboardViewModel.allQuranProgress.collectAsState()
     val completedCount by dashboardViewModel.completedJuzCount.collectAsState()
 
-    // ── حسابات التقدم ─────────────────────────────────
-    val totalJuz   = selectedKhatma * 30
-    val progress   = dashboardViewModel.getLanternProgress(selectedKhatma, completedCount ?: 0)
-    val currentJuz = dashboardViewModel.getCurrentJuz(selectedKhatma, completedCount ?: 0)
-    val currentKhatma = dashboardViewModel.getCurrentKhatma(completedCount ?: 0)
+    val completed     = completedCount ?: 0
+    val totalJuz      = selectedKhatma * 30
+    val progress      = dashboardViewModel.getLanternProgress(selectedKhatma, completed)
+    val currentJuz    = dashboardViewModel.getCurrentJuz(selectedKhatma, completed)
+    val currentKhatma = dashboardViewModel.getCurrentKhatma(completed)
 
-    // ── قائمة الأجزاء المكتملة من Room ───────────────
+    // ── تهيئة الأجزاء عند أول تحميل وعند تغيير الختمات ──
+    LaunchedEffect(selectedKhatma) {
+        dashboardViewModel.initQuranProgress(selectedKhatma)
+    }
+
     val completedSet = allProgress
         .filter { it.isCompleted }
         .map { it.juzNumber + ((it.khatmaNumber - 1) * 30) }
         .toSet()
 
+    if (showKhatmaDialog) {
+        AlertDialog(
+            onDismissRequest = { showKhatmaDialog = false },
+            containerColor = Color(0xFF0D1F0D),
+            title = {
+                Text(
+                    text = "🎉 أتممت الختمة!",
+                    fontFamily = AlmaraiFont,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 20.sp,
+                    color = GoldColor,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Text(
+                    text = "ستبدأ دورة جديدة لختم القرآن الكريم.\nهل تريد المتابعة؟",
+                    fontFamily = IbmPlexArabicFont,
+                    fontSize = 14.sp,
+                    color = WhiteColor,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showKhatmaDialog = false
+                    scope.launch {
+                        dashboardViewModel.resetQuranProgress(selectedKhatma)
+                    }
+                }) {
+                    Text(text = "تأكيد", color = GreenLight, fontFamily = AlmaraiFont, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showKhatmaDialog = false }) {
+                    Text(text = "إلغاء", color = SubtitleColor, fontFamily = IbmPlexArabicFont)
+                }
+            }
+        )
+    }
+
     Scaffold(
-        bottomBar = {
-            BottomNavBar(
-                selectedRoute = "quran",
-                onItemSelected = { }
-            )
-        },
+        bottomBar = { BottomNavBar(selectedRoute = "quran", onItemSelected = { }) },
         containerColor = Color.Transparent
     ) { innerPadding ->
 
@@ -91,7 +139,6 @@ fun QuranScreen(
             ) {
                 Spacer(modifier = Modifier.height(52.dp))
 
-                // ══ TopBar ══════════════════════════════
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -120,7 +167,6 @@ fun QuranScreen(
                             }
                         }
                     }
-
                     Text(
                         text = "ختمة القرآن",
                         fontFamily = AlmaraiFont,
@@ -128,7 +174,6 @@ fun QuranScreen(
                         fontSize = 22.sp,
                         color = GoldColor
                     )
-
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
@@ -143,25 +188,20 @@ fun QuranScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // ══ اختيار عدد الختمات ══════════════════
                 KhatmaSelector(
                     selected = selectedKhatma,
                     onSelect = { newKhatma ->
                         selectedKhatma = newKhatma
-                        scope.launch {
-                            dashboardViewModel.initQuranProgress(newKhatma)
-                        }
+                        scope.launch { dashboardViewModel.initQuranProgress(newKhatma) }
                     }
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // ══ الفانوس ══════════════════════════════
                 LanternProgress(progress = progress)
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // ══ الجزء الحالي ══════════════════════════
                 Text(
                     text = "الجزء $currentJuz من 30",
                     fontFamily = AlmaraiFont,
@@ -174,7 +214,7 @@ fun QuranScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "متقدم • ${30 - currentJuz} أيام متبقية",
+                    text = "متقدم • ${(30 - currentJuz).coerceAtLeast(0)} أيام متبقية",
                     fontFamily = IbmPlexArabicFont,
                     fontSize = 13.sp,
                     color = SubtitleColor,
@@ -183,31 +223,32 @@ fun QuranScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // ══ بطاقة الهدف اليومي ═══════════════════
                 DailyGoalCard(
-                    khatmaCount   = selectedKhatma,
-                    currentJuz    = currentJuz,
-                    onRecordClick = {
+                    khatmaCount    = selectedKhatma,
+                    currentJuz     = currentJuz,
+                    completedCount = completed,
+                    totalJuz       = totalJuz,
+                    onRecordClick  = {
                         scope.launch {
                             dashboardViewModel.completeJuz(currentJuz, currentKhatma)
+                            if (currentJuz == 30) showKhatmaDialog = true
                         }
                     }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // ══ قائمة الأجزاء ════════════════════════
                 JuzListSection(
                     khatmaCount     = selectedKhatma,
                     completedJuzSet = completedSet,
-                    currentJuz      = (completedCount ?: 0) + 1,
+                    currentJuz      = completed + 1,
                     onJuzToggle     = { globalJuz ->
-                        val juzNum   = ((globalJuz - 1) % 30) + 1
+                        val juzNum    = ((globalJuz - 1) % 30) + 1
                         val khatmaNum = ((globalJuz - 1) / 30) + 1
                         scope.launch {
-                            val isCompleted = completedSet.contains(globalJuz)
-                            if (!isCompleted) {
+                            if (!completedSet.contains(globalJuz)) {
                                 dashboardViewModel.completeJuz(juzNum, khatmaNum)
+                                if (juzNum == 30) showKhatmaDialog = true
                             }
                         }
                     }
@@ -220,7 +261,6 @@ fun QuranScreen(
 }
 
 
-// ── الفانوس مع نسبة التقدم ───────────────────────────
 @Composable
 fun LanternProgress(progress: Float) {
     val animatedProgress by animateFloatAsState(
@@ -234,18 +274,42 @@ fun LanternProgress(progress: Float) {
         contentAlignment = Alignment.Center,
         modifier = Modifier.size(width = 180.dp, height = 240.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth(0.52f)
-                .fillMaxHeight(animatedProgress.coerceAtLeast(0.02f))
-                .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp, topStart = 20.dp, topEnd = 20.dp))
-                .background(
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val padH = w * 0.22f
+            val padT = h * 0.18f
+            val padB = h * 0.10f
+            val bodyLeft   = padH
+            val bodyRight  = w - padH
+            val bodyTop    = padT
+            val bodyBottom = h - padB
+            val bodyHeight = bodyBottom - bodyTop
+            val fillHeight = bodyHeight * animatedProgress
+            val fillTop    = (bodyBottom - fillHeight).coerceAtLeast(bodyTop)
+
+            val lanternPath = Path().apply {
+                addOval(Rect(left = bodyLeft, top = bodyTop, right = bodyRight, bottom = bodyBottom))
+            }
+            val fillPath = Path().apply {
+                moveTo(bodyLeft - 1f, fillTop)
+                lineTo(bodyRight + 1f, fillTop)
+                lineTo(bodyRight + 1f, bodyBottom + 1f)
+                lineTo(bodyLeft - 1f, bodyBottom + 1f)
+                close()
+            }
+
+            clipPath(lanternPath) {
+                drawPath(
+                    path = fillPath,
                     brush = Brush.verticalGradient(
-                        listOf(GreenLight.copy(alpha = 0.75f), GreenDark)
+                        colors = listOf(GreenLight.copy(alpha = 0.85f), GreenDark),
+                        startY = fillTop,
+                        endY   = bodyBottom
                     )
                 )
-        )
+            }
+        }
 
         Image(
             painter = painterResource(id = R.drawable.fanous),
@@ -258,7 +322,7 @@ fun LanternProgress(progress: Float) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(bottom = 24.dp)
+                .padding(bottom = 30.dp)
         ) {
             Text(
                 text = "%$percent",
@@ -278,17 +342,19 @@ fun LanternProgress(progress: Float) {
 }
 
 
-// ── بطاقة الهدف اليومي ───────────────────────────────
 @Composable
 fun DailyGoalCard(
     khatmaCount: Int,
     currentJuz: Int,
+    completedCount: Int,
+    totalJuz: Int,
     onRecordClick: () -> Unit
 ) {
-    val dailyPages = khatmaCount * 20
-    val startPage  = ((currentJuz - 1) * 20) + 1
-    val endPage    = startPage + dailyPages - 1
-    val juzInfo    = QuranData.juzList.getOrNull(currentJuz - 1)
+    val dailyPages  = khatmaCount * 20
+    val startPage   = ((currentJuz - 1) * 20) + 1
+    val endPage     = startPage + dailyPages - 1
+    val juzInfo     = QuranData.juzList.getOrNull(currentJuz - 1)
+    val progressPct = if (totalJuz == 0) 0 else (completedCount * 100 / totalJuz)
 
     Box(
         modifier = Modifier
@@ -311,7 +377,7 @@ fun DailyGoalCard(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "%${(currentJuz.toFloat() / 30f * 100).toInt()}",
+                        text = "%$progressPct",
                         color = GreenLight,
                         fontFamily = IbmPlexArabicFont,
                         fontSize = 11.sp,
@@ -323,7 +389,12 @@ fun DailyGoalCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(text = "الهدف اليومي", color = SubtitleColor, fontFamily = IbmPlexArabicFont, fontSize = 12.sp)
-                    Text(text = "📅", fontSize = 14.sp)
+                    Icon(
+                        painter = painterResource(id = R.drawable.calendar),
+                        contentDescription = null,
+                        tint = SubtitleColor,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
 
@@ -367,7 +438,12 @@ fun DailyGoalCard(
                         .border(1.dp, WhiteColor.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
                         .clickable { }
                 ) {
-                    Text(text = "✏️", fontSize = 18.sp)
+                    Icon(
+                        painter = painterResource(id = R.drawable.hillal),
+                        contentDescription = "تعديل",
+                        tint = SubtitleColor,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
 
                 Box(
@@ -383,7 +459,12 @@ fun DailyGoalCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(text = "✅", fontSize = 16.sp)
+                        Icon(
+                            painter = painterResource(id = R.drawable.checked),
+                            contentDescription = null,
+                            tint = WhiteColor,
+                            modifier = Modifier.size(18.dp)
+                        )
                         Text(
                             text = "سجل القراءة",
                             color = WhiteColor,
@@ -399,7 +480,6 @@ fun DailyGoalCard(
 }
 
 
-// ── قائمة الأجزاء ────────────────────────────────────
 @Composable
 fun JuzListSection(
     khatmaCount: Int,
@@ -438,12 +518,12 @@ fun JuzListSection(
         Spacer(modifier = Modifier.height(12.dp))
 
         repeat(30 * khatmaCount) { index ->
-            val juzNumber  = (index % 30) + 1
-            val khatmaNum  = (index / 30) + 1
-            val globalJuz  = index + 1
+            val juzNumber   = (index % 30) + 1
+            val khatmaNum   = (index / 30) + 1
+            val globalJuz   = index + 1
             val isCompleted = completedJuzSet.contains(globalJuz)
-            val isCurrent  = globalJuz == currentJuz
-            val juzInfo    = QuranData.juzList.getOrNull(juzNumber - 1)
+            val isCurrent   = globalJuz == currentJuz
+            val juzInfo     = QuranData.juzList.getOrNull(juzNumber - 1)
 
             JuzItem(
                 juzNumber   = juzNumber,
@@ -460,7 +540,6 @@ fun JuzListSection(
 }
 
 
-// ── عنصر جزء واحد ────────────────────────────────────
 @Composable
 fun JuzItem(
     juzNumber: Int,
@@ -492,7 +571,6 @@ fun JuzItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // ── Checkbox ──────────────────────────────
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -507,7 +585,6 @@ fun JuzItem(
             }
         }
 
-        // ── معلومات الجزء ──────────────────────────
         Column(
             horizontalAlignment = Alignment.End,
             modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
@@ -558,7 +635,6 @@ fun JuzItem(
             )
         }
 
-        // ── أول كلمات الجزء ───────────────────────
         Text(
             text = juzInfo?.firstWords ?: "",
             color = SubtitleColor.copy(alpha = 0.6f),
@@ -571,7 +647,6 @@ fun JuzItem(
 }
 
 
-// ── اختيار عدد الختمات ───────────────────────────────
 @Composable
 fun KhatmaSelector(
     selected: Int,
