@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.ramadan.ui.screens.AdhkarScreen
 import com.example.ramadan.ui.screens.DashboardScreen
 import com.example.ramadan.ui.screens.DhikrScreen
@@ -21,15 +22,23 @@ object Routes {
     const val QURAN = "quran"
     const val DHIKR = "dhikr"
     const val ADHKAR = "adhkar/{type}"
+
 }
 
 @Composable
-fun NavGraph() {
+fun NavGraph(
+    startDestination: String = Routes.WELCOME,
+    onSetupComplete: () -> Unit = {}
+) {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = Routes.WELCOME
+        startDestination = startDestination,
+        enterTransition = { androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(400)) },
+        exitTransition = { androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(400)) },
+        popEnterTransition = { androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(400)) },
+        popExitTransition = { androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(400)) }
     ) {
         // صفحة الترحيب
         composable(Routes.WELCOME) {
@@ -58,26 +67,49 @@ fun NavGraph() {
                     navController.popBackStack()
                 },*/
                 onContinueClick = {
-                    navController.navigate(Routes.QURAN)
+                    onSetupComplete()
+                    navController.navigate(Routes.QURAN) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
                 }
             )
         }
         composable(Routes.DASHBOARD) {
-            DashboardScreen(onNavigate = { navController.navigate(it) })
+            DashboardScreen(onNavigate = { route ->
+                navController.navigate(route) {
+                    popUpTo(Routes.QURAN) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            })
         }
 
         composable(Routes.QURAN) {
-            QuranScreen(onNavigate = { navController.navigate(it) })
+            QuranScreen(onNavigate = { route ->
+                navController.navigate(route) {
+                    popUpTo(Routes.QURAN) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            })
         }
 
         composable(Routes.DHIKR) {
-            DhikrScreen(onNavigate = { navController.navigate(it) })
+            DhikrScreen(onNavigate = { route ->
+                navController.navigate(route) {
+                    popUpTo(Routes.QURAN) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            })
         }
 
-        composable("adhkar/{type}") { backStackEntry ->
-            val type = backStackEntry.arguments?.getString("type") ?: "sabah"
+        composable(
+            route = "adhkar/{type}",
+            arguments = listOf(navArgument("type") { defaultValue = "sabah" })
+        ) { backStackEntry ->
             AdhkarScreen(
-                type   = type,
+                type   = backStackEntry.arguments?.getString("type") ?: "sabah",
                 onBack = { navController.popBackStack() }
             )
         }
