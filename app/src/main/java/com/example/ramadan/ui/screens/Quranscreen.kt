@@ -112,7 +112,7 @@ fun QuranScreen(
     }
 
     Scaffold(
-        bottomBar = { BottomNavBar(selectedRoute = "quran", onItemSelected = { }) },
+        bottomBar = { BottomNavBar(selectedRoute = "quran", onItemSelected = { route -> onNavigate(route) }) },
         containerColor = Color.Transparent
     ) { innerPadding ->
 

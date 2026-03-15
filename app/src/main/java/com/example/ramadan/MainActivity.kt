@@ -16,19 +16,28 @@ import com.example.ramadan.ui.screens.PrayerNotificationScreen
 import com.example.ramadan.ui.screens.QuranScreen
 
 
+import com.example.ramadan.navigation.Routes
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        org.osmdroid.config.Configuration.getInstance().load(
-            this,
-            androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-        )
+        val sharedPref = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        org.osmdroid.config.Configuration.getInstance().load(this, sharedPref)
+        
+        val isFirstLaunch = sharedPref.getBoolean("is_first_launch", true)
+        val startDest = if (isFirstLaunch) Routes.WELCOME else Routes.QURAN
+
         enableEdgeToEdge()
         setContent {
             RamadanTheme {
                 //AdhkarScreen()
-                DhikrScreen()
-                //NavGraph()
+                //DhikrScreen()
+                NavGraph(
+                    startDestination = startDest,
+                    onSetupComplete = {
+                        sharedPref.edit().putBoolean("is_first_launch", false).apply()
+                    }
+                )
                 //QuranScreen()
                 //DashboardScreen()
                 //WelcomeScreen()
